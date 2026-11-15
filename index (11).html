@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>مدل آماری دنیاساز</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-tap-highlight-color:transparent}
+body{background-color:#000;color:#fff;height:100dvh;display:flex;flex-direction:column;overflow:hidden;padding-bottom:75px}
+.header{display:flex;justify-content:space-between;align-items:center;padding:16px;width:100%;flex-shrink:0;z-index:10}
+.header-right-group{display:flex;align-items:center;gap:8px}
+.icon-btn{width:44px;height:44px;border-radius:50%;background-color:#1c1c1e;border:none;display:flex;justify-content:center;align-items:center;cursor:pointer;color:#fff;flex-shrink:0}
+.icon-btn svg{width:20px;height:20px}
+.plus-btn-header{background-color:#a8c8e8;border:none;border-radius:20px;padding:10px 16px;display:flex;align-items:center;gap:6px;cursor:pointer;color:#0d2a4d;font-weight:bold;font-size:15px;flex-shrink:0}
+.plus-btn-header svg{width:16px;height:16px;fill:#0d2a4d}
+.main-content{flex-grow:1;width:100%;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:14px}
+.welcome{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center;color:#8e8e93;gap:12px}
+.welcome h1{font-size:22px;color:#fff;font-weight:bold}
+.welcome p{font-size:14px;max-width:300px;line-height:1.7}
+.message{padding:12px 16px;border-radius:20px;line-height:1.6;word-wrap:break-word;animation:fadeIn .3s ease}
+.message.user{background-color:#1e4d7b;color:#fff;align-self:flex-end;border-bottom-left-radius:6px;font-size:15px;max-width:80%}
+.ai-message-wrapper{display:flex;flex-direction:column;align-items:flex-start;gap:6px;max-width:85%;align-self:flex-start}
+.ai-message-wrapper .message.ai{background-color:#1c1c1e;color:#fff;align-self:auto;border-bottom-right-radius:6px;font-size:14px;line-height:1.7;padding:14px 16px;max-width:100%;white-space:pre-wrap;display:flex;flex-direction:column}
+.preview-img{width:100%;height:180px;border-radius:12px;object-fit:cover;margin-bottom:12px;border:1px solid #333}
+.msg-title{font-weight:bold;margin-bottom:12px;font-size:15px;color:#fff}
+.action-buttons{display:flex;gap:8px;margin-top:4px}
+.action-btn-link{display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;border-radius:10px;text-decoration:none;font-size:13px;font-weight:bold;flex:1;transition:.2s}
+.btn-view{background:#0a84ff;color:#fff}
+.btn-download{background:#2c2c2e;color:#fff;border:1px solid #3a3a3c}
+.typing-indicator{align-self:flex-start;padding:4px 0;display:flex;align-items:center;justify-content:center;width:fit-content}
+.typing-dot{width:8px;height:8px;background-color:#0a84ff;border-radius:50%;animation:pulse 1s infinite ease-in-out}
+@keyframes pulse{0%{transform:scale(.8);opacity:.4}50%{transform:scale(1.3);opacity:1}100%{transform:scale(.8);opacity:.4}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.input-area{position:fixed;bottom:0;left:0;width:100%;padding:12px 16px;background-color:#000;display:flex;flex-direction:column;gap:8px;z-index:1000}
+.input-bar{background-color:#1c1c1e;border-radius:28px;width:100%;display:flex;align-items:center;gap:6px;padding:6px 10px}
+.chat-input{flex:1 1 auto;min-width:0;background:transparent;border:none;outline:none;color:#fff;font-size:15px;padding:10px 4px;direction:rtl;text-align:right}
+.chat-input::placeholder{color:#8e8e93;opacity:1}
+.left-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.send-btn{width:36px;height:36px;border-radius:50%;background-color:#0a84ff;border:none;display:none;justify-content:center;align-items:center;cursor:pointer;color:#fff}
+.send-btn svg{width:18px;height:18px}
+.input-bar.has-text .send-btn{display:flex}
+.sidebar-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1999;opacity:0;pointer-events:none;transition:opacity .3s ease}
+.sidebar-overlay.open{opacity:1;pointer-events:auto}
+.sidebar{position:fixed;top:0;right:0;width:82%;max-width:320px;height:100%;background-color:#1a1a1c;z-index:2000;transform:translateX(100%);transition:transform .3s;display:flex;flex-direction:column}
+.sidebar.open{transform:translateX(0)}
+.sidebar-header{padding:24px 20px 16px;border-bottom:1px solid #2a2a2c;display:flex;justify-content:space-between;align-items:center}
+.sidebar-title{font-size:18px;font-weight:bold;color:#fff}
+.sidebar-close{background:none;border:none;color:#8e8e93;cursor:pointer;padding:6px}
+.sidebar-close svg{width:20px;height:20px}
+.sidebar-content{flex:1;overflow-y:auto;padding:8px 0}
+.chat-item{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;cursor:pointer;gap:12px;min-height:52px}
+.chat-item.active{background-color:#252527}
+.chat-title{flex:1;font-size:14px;color:#fff;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chat-dot{width:8px;height:8px;border-radius:50%;background-color:transparent;flex-shrink:0}
+.chat-item.active .chat-dot{background-color:#0a84ff}
+</style>
+</head>
+<body>
+<header class="header">
+<div class="header-right-group">
+<button class="icon-btn" id="menuBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="9" x2="20" y2="9"></line><line x1="4" y1="15" x2="20" y2="15"></line></svg></button>
+<button class="plus-btn-header" id="plusHeaderBtn"><span>دنیای جدید</span><svg viewBox="0 0 24 24"><path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z"/></svg></button>
+</div>
+<button class="icon-btn" id="newChatBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
+</header>
+<main class="main-content" id="chatContainer"></main>
+<div class="input-area">
+<div class="input-bar" id="inputBar">
+<input type="text" id="chatInput" class="chat-input" placeholder="مثلا: یک جنگل تاریک..." autocomplete="off">
+<div class="left-actions"><button class="send-btn" id="sendBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg></button></div>
+</div>
+</div>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<aside class="sidebar" id="sidebar">
+<div class="sidebar-header">
+<div class="sidebar-title">تاریخچه</div>
+<button class="sidebar-close" id="sidebarCloseBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+</div>
+<div class="sidebar-content" id="sidebarContent"></div>
+</aside>
+<div id="hidden-render" style="position:fixed;top:-9999px;left:-9999px"></div>
+<script type="importmap">
+{ "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
+</script>
+<script type="module">
+import * as THREE from 'three';
+const CHATS_KEY='stat_world_v4',CURRENT_CHAT_KEY='stat_current_v4';
+let currentChatId=null,isSending=false;
+const inputBar=document.getElementById('inputBar'),chatInput=document.getElementById('chatInput'),chatContainer=document.getElementById('chatContainer');
+const Models={
+Tree:()=>{const g=new THREE.Group();const t=new THREE.Mesh(new THREE.CylinderGeometry(.5,.8,6,6),new THREE.MeshStandardMaterial({color:0x4a3018}));t.position.y=3;t.castShadow=true;g.add(t);for(let i=0;i<3;i++){const c=new THREE.Mesh(new THREE.ConeGeometry(3.5-i,6,7),new THREE.MeshStandardMaterial({color:0x1e5631,roughness:.8}));c.position.y=6+i*2.8;c.castShadow=true;g.add(c)}return g},
+House:(s,c)=>{const g=new THREE.Group();const wallColors=[0xd0d0d0,0xe0e0e0,0xf5f5dc,0xa9a9a9];const roofColors=[0x8b0000,0x2c3e50,0x5c4033,0x808080];const b=new THREE.Mesh(new THREE.BoxGeometry(6,10,6),new THREE.MeshStandardMaterial({color:wallColors[c%4]}));b.position.y=5*s;b.scale.y=s;b.castShadow=b.receiveShadow=true;g.add(b);const r=new THREE.Mesh(new THREE.ConeGeometry(5.5,4,4),new THREE.MeshStandardMaterial({color:roofColors[c%4]}));r.position.y=(10*s)+2;r.rotation.y=Math.PI/4;r.castShadow=true;g.add(r);return g},
+Mountain:()=>{const g=new THREE.Group(),h=45+Math.random()*20,r=30+Math.random()*10;const b=new THREE.Mesh(new THREE.ConeGeometry(r,h,7),new THREE.MeshStandardMaterial({color:0x4a5d23,roughness:.9,flatShading:true}));b.position.y=h/2;b.castShadow=true;b.receiveShadow=true;g.add(b);const s=new THREE.Mesh(new THREE.ConeGeometry(r*0.35,h*0.35,7),new THREE.MeshStandardMaterial({color:0xffffff,roughness:.4}));s.position.y=h-(h*0.17);s.castShadow=true;g.add(s);return g},
+Car:()=>{const g=new THREE.Group();const b=new THREE.Mesh(new THREE.BoxGeometry(6,1.5,3),new THREE.MeshStandardMaterial({color:0x2980b9,metalness:.6}));b.position.y=1.5;b.castShadow=true;g.add(b);const c=new THREE.Mesh(new THREE.BoxGeometry(3,1.5,2.6),new THREE.MeshStandardMaterial({color:0x111111,metalness:.8}));c.position.set(-.5,3,0);c.castShadow=true;g.add(c);const wG=new THREE.CylinderGeometry(.8,.8,.6,12),wM=new THREE.MeshStandardMaterial({color:0x222222});[[-1.8,.8,1.5],[1.8,.8,1.5],[-1.8,.8,-1.5],[1.8,.8,-1.5]].forEach(p=>{const w=new THREE.Mesh(wG,wM);w.rotation.x=Math.PI/2;w.position.set(...p);w.castShadow=true;g.add(w)});return g}
+};
+function buildScene(data,isThumbnail,containerId){
+const width=isThumbnail?400:window.innerWidth,height=isThumbnail?250:window.innerHeight;
+const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(45,width/height,.1,2000);
+camera.position.set(120, 100, 120);camera.lookAt(0,0,0);
+const renderer=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});
+renderer.setSize(width,height);renderer.shadowMap.enabled=true;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.outputColorSpace=THREE.SRGBColorSpace;
+if(isThumbnail)document.getElementById(containerId).appendChild(renderer.domElement);
+const isNight=data.time==='night';
+scene.background=new THREE.Color(isNight?0x0a0a2a:0x87ceeb);
+scene.fog=new THREE.FogExp2(scene.background,.003);
+scene.add(new THREE.HemisphereLight(0xffffff,0x444444,.8));
+const dl=new THREE.DirectionalLight(0xfff5e6,2.0);dl.position.set(80,150,80);dl.castShadow=true;dl.shadow.mapSize.width=2048;dl.shadow.mapSize.height=2048;scene.add(dl);
+const groundGeo=new THREE.PlaneGeometry(300,300,data.gridSize,data.gridSize);
+const pos=groundGeo.attributes.position;
+for(let i=0;i<pos.count;i++){pos.setZ(i,data.terrain[i])}
+groundGeo.computeVertexNormals();
+const ground=new THREE.Mesh(groundGeo,new THREE.MeshStandardMaterial({color:isNight?0x1a3a1a:0x4caf50,roughness:1}));
+ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
+data.objects.forEach(obj=>{let mesh;if(obj.type==='tree')mesh=Models.Tree();else if(obj.type==='house')mesh=Models.House(obj.scale,obj.color);else if(obj.type==='mountain')mesh=Models.Mountain();else if(obj.type==='car')mesh=Models.Car();
+if(mesh){mesh.position.set(obj.x,0,obj.z);if(obj.type!=='house'&&obj.type!=='car'){mesh.rotation.y=obj.rot;mesh.scale.set(obj.scale,obj.scale,obj.scale)}else if(obj.type==='car'){mesh.rotation.y=obj.rot}scene.add(mesh)}});
+renderer.render(scene,camera);
+const result=isThumbnail?renderer.domElement.toDataURL('image/jpeg',.8):null;
+renderer.dispose();if(isThumbnail)document.getElementById(containerId).innerHTML='';return result;
+}
+function getChats(){try{return JSON.parse(localStorage.getItem(CHATS_KEY)||'[]')}catch(e){return[]}}
+function saveChats(chats){localStorage.setItem(CHATS_KEY,JSON.stringify(chats))}
+function getCurrentChat(){return currentChatId?getChats().find(c=>c.id===currentChatId)||null:null}
+function ensureCurrentChat(){let c=getCurrentChat();if(c)return c;const id='chat_'+Date.now();c={id,title:'دنیای جدید',messages:[],updatedAt:Date.now()};const ch=getChats();ch.unshift(c);saveChats(ch);currentChatId=id;localStorage.setItem(CURRENT_CHAT_KEY,id);return c}
+function updateChatInStorage(chat){const chats=getChats(),idx=chats.findIndex(c=>c.id===chat.id);if(idx===-1)chats.unshift(chat);else chats[idx]=chat;saveChats(chats)}
+function renderSidebar(){const chats=getChats(),box=document.getElementById('sidebarContent');box.innerHTML='';if(chats.length===0){box.innerHTML='<div style="padding:20px;text-align:center;color:#8e8e93;font-size:13px;">هنوز دنیایی نساخته‌اید.</div>';return}chats.sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));chats.forEach(chat=>{const item=document.createElement('div');item.className='chat-item';if(chat.id===currentChatId)item.classList.add('active');item.innerHTML=`<div class="chat-title">${chat.title}</div><div class="chat-dot"></div>`;item.onclick=()=>{loadChat(chat.id);closeSidebar()};box.appendChild(item)})}
+function openSidebar(){renderSidebar();document.getElementById('sidebar').classList.add('open');document.getElementById('sidebarOverlay').classList.add('open')}
+function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('sidebarOverlay').classList.remove('open')}
+function loadChat(chatId){const chat=getChats().find(c=>c.id===chatId);if(!chat)return;currentChatId=chat.id;localStorage.setItem(CURRENT_CHAT_KEY,chat.id);chatContainer.innerHTML='';if(chat.messages.length===0)showWelcome();else chat.messages.forEach(m=>{if(m.role==='user')appendMessageToUI(m.content,'user');else appendMessageToUI(m.content,'ai',m.prompt,m.image)});scrollToBottom()}
+function showWelcome(){chatContainer.innerHTML='<div class="welcome"><h1>مدل آماری دنیاساز</h1><p>پرامپت خود را وارد کنید (مثلا: جنگل تاریک، شهر بزرگ، کوه‌های برفی)</p></div>'}
+function appendMessageToUI(text,sender,promptData=null,imageData=null){const welcomeEl=chatContainer.querySelector('.welcome');if(welcomeEl)welcomeEl.remove();if(sender==='user'){const messageDiv=document.createElement('div');messageDiv.classList.add('message','user');messageDiv.textContent=text;chatContainer.appendChild(messageDiv)}else{const wrapper=document.createElement('div');wrapper.classList.add('ai-message-wrapper');const messageDiv=document.createElement('div');messageDiv.classList.add('message','ai');let html='';if(imageData)html+=`<img src="${imageData}" class="preview-img">`;html+=`<div class="msg-title">${text}</div>`;if(promptData){const q=encodeURIComponent(promptData);html+=`<div class="action-buttons"><a href="world.html?q=${q}" target="_blank" class="action-btn-link btn-view">مشاهده</a><a href="download.php?q=${q}" class="action-btn-link btn-download">دانلود</a></div>`}messageDiv.innerHTML=html;wrapper.appendChild(messageDiv);chatContainer.appendChild(wrapper)}scrollToBottom()}
+function scrollToBottom(){chatContainer.scrollTop=chatContainer.scrollHeight}
+async function sendMessage(){const text=chatInput.value.trim();if(!text||isSending)return;isSending=true;const chat=ensureCurrentChat();appendMessageToUI(text,'user');chat.messages.push({role:'user',content:text});chat.title=text;chat.updatedAt=Date.now();updateChatInStorage(chat);chatInput.value='';inputBar.classList.remove('has-text');const typingIndicator=document.createElement('div');typingIndicator.classList.add('typing-indicator');typingIndicator.innerHTML='<div class="typing-dot"></div>';chatContainer.appendChild(typingIndicator);scrollToBottom();try{const res=await fetch('api.php?q='+encodeURIComponent(text));if(!res.ok)throw new Error('Server error');const sceneData=await res.json();const thumbnail=buildScene(sceneData,true,'hidden-render');typingIndicator.remove();const responseText=`دنیای «${text}» ساخته شد.`;appendMessageToUI(responseText,'ai',text,thumbnail);chat.messages.push({role:'assistant',content:responseText,prompt:text,image:thumbnail});chat.updatedAt=Date.now();updateChatInStorage(chat)}catch(e){typingIndicator.remove();appendMessageToUI('خطا در پردازش مدل. لطفا دوباره تلاش کنید.','ai')}isSending=false}
+document.getElementById('menuBtn').addEventListener('click',openSidebar);document.getElementById('plusHeaderBtn').addEventListener('click',openSidebar);document.getElementById('sidebarOverlay').addEventListener('click',closeSidebar);document.getElementById('sidebarCloseBtn').addEventListener('click',closeSidebar);
+chatInput.addEventListener('input',()=>{inputBar.classList.toggle('has-text',!!chatInput.value.trim())});
+chatInput.addEventListener('keydown',e=>{if(e.key==='Enter'&&chatInput.value.trim()&&!isSending){e.preventDefault();sendMessage()}});
+document.getElementById('sendBtn').addEventListener('click',sendMessage);
+document.getElementById('newChatBtn').addEventListener('click',()=>{currentChatId=null;localStorage.removeItem(CURRENT_CHAT_KEY);chatContainer.innerHTML='';showWelcome();renderSidebar()});
+function init(){const savedId=localStorage.getItem(CURRENT_CHAT_KEY);if(savedId){const chat=getChats().find(c=>c.id===savedId);if(chat){loadChat(savedId);return}}showWelcome();renderSidebar()}
+init();
+</script>
+</body>
+</html>
